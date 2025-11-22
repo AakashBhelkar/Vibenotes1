@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  displayName String?
+  createdAt   DateTime @default(now())
+  notes       Note[]
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  content   String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  version   Int      @default(1)
+  isArchived Boolean @default(false)
+  isPinned  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+  attachments Attachment[]
+}
+
+model Attachment {
+  id       String @id @default(uuid())
+  noteId   String
+  url      String
+  fileName String
+  size     Int
+
+  note Note @relation(fields: [noteId], references: [id])
+}
