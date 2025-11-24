@@ -22,8 +22,11 @@ export default function LoginPage() {
             const response = await authService.login({ email, password });
             authService.saveAuth(response);
             navigate('/notes');
-        } catch (err: any) {
-            setError(err.response?.data?.error?.message || 'Login failed. Please try again.');
+        } catch (err: unknown) {
+            const errorMessage = err && typeof err === 'object' && 'response' in err
+                ? ((err.response as { data?: { error?: { message?: string } } })?.data?.error?.message || 'Login failed. Please try again.')
+                : 'Login failed. Please try again.';
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }

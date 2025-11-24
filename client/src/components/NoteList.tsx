@@ -33,7 +33,7 @@ export function NoteList({
     templateSelector,
 }: NoteListProps) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedTag, setSelectedTag] = useState<string | null>(null);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
     // Extract all unique tags from notes
     const allTags = useMemo(() => {
@@ -49,12 +49,27 @@ export function NoteList({
         onSearch(query);
     };
 
-    // Filter notes by selected tag locally if needed
-    // (Note: The parent onSearch handles text search, this handles tag filtering on top)
+    const handleTagToggle = (tag: string) => {
+        setSelectedTags(prev => {
+            if (prev.includes(tag)) {
+                return prev.filter(t => t !== tag);
+            } else {
+                return [...prev, tag];
+            }
+        });
+    };
+
+    const handleClearTags = () => {
+        setSelectedTags([]);
+    };
+
+    // Filter notes by selected tags locally (AND logic - note must have ALL selected tags)
     const filteredNotes = useMemo(() => {
-        if (!selectedTag) return notes;
-        return notes.filter(note => note.tags.includes(selectedTag));
-    }, [notes, selectedTag]);
+        if (selectedTags.length === 0) return notes;
+        return notes.filter(note =>
+            selectedTags.every(tag => note.tags.includes(tag))
+        );
+    }, [notes, selectedTags]);
 
     return (
         <div className="flex flex-col h-full border-r bg-card">
@@ -87,24 +102,32 @@ export function NoteList({
 
                 {/* Tag Filter */}
                 {allTags.length > 0 && (
-                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        <Badge
-                            variant={selectedTag === null ? "default" : "outline"}
-                            className="cursor-pointer whitespace-nowrap"
-                            onClick={() => setSelectedTag(null)}
-                        >
-                            All
-                        </Badge>
-                        {allTags.map(tag => (
-                            <Badge
-                                key={tag}
-                                variant={selectedTag === tag ? "default" : "outline"}
-                                className="cursor-pointer whitespace-nowrap"
-                                onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                            >
-                                {tag}
-                            </Badge>
-                        ))}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">Filter by tags:</span>
+                            {selectedTags.length > 0 && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleClearTags}
+                                    className="h-6 px-2 text-xs"
+                                >
+                                    Clear ({selectedTags.length})
+                                </Button>
+                            )}
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                            {allTags.map(tag => (
+                                <Badge
+                                    key={tag}
+                                    variant={selectedTags.includes(tag) ? "default" : "outline"}
+                                    className="cursor-pointer whitespace-nowrap"
+                                    onClick={() => handleTagToggle(tag)}
+                                >
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>

@@ -250,6 +250,19 @@ function downloadFile(content: string, filename: string, mimeType: string): void
 }
 
 /**
+ * Interface for imported note data from JSON backup files
+ */
+interface ImportedNoteData {
+    title?: string;
+    content?: string;
+    tags?: string[];
+    isPinned?: boolean;
+    id?: string;
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
+}
+
+/**
  * Import notes from JSON file
  */
 export async function importNotesFromJSON(file: File): Promise<Partial<Note>[]> {
@@ -266,7 +279,7 @@ export async function importNotesFromJSON(file: File): Promise<Partial<Note>[]> 
                 }
 
                 // Return notes without IDs (will be generated on import)
-                const notes = data.notes.map((note: any) => ({
+                const notes = data.notes.map((note: ImportedNoteData) => ({
                     title: note.title || 'Untitled',
                     content: note.content || '',
                     tags: note.tags || [],

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Note } from '@/lib/db';
 
 // Mock note for testing
@@ -12,8 +12,7 @@ const mockNote: Note = {
     isArchived: false,
     createdAt: new Date('2025-01-01'),
     updatedAt: new Date('2025-01-15'),
-    version: 1,
-    syncStatus: 'synced'
+    version: 1
 };
 
 describe('Export Service', () => {

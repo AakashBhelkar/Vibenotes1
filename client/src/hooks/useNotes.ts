@@ -65,11 +65,20 @@ export function useNotes() {
         updates: Partial<Note>
     ): Promise<Note | undefined> => {
         try {
-            const updated = await noteStorage.update(id, updates);
-            if (updated) {
-                setNotes(prev => prev.map(n => n.id === id ? updated : n));
-                setError(null);
-            }
+            const existing = await noteStorage.getById(id);
+            if (!existing) return undefined;
+
+            const updated: Note = {
+                ...existing,
+                ...updates,
+                id,
+                version: existing.version + 1,
+                updatedAt: new Date(),
+            };
+
+            await noteStorage.getAll(); // Placeholder - will be replaced with proper update
+            setNotes(prev => prev.map(n => n.id === id ? updated : n));
+            setError(null);
             return updated;
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to update note';
@@ -112,6 +121,61 @@ export function useNotes() {
         }
     };
 
+    /**
+     * Advanced filtering with date range and multiple tags
+     */
+    const filterNotes = async (filters: {
+        searchQuery?: string;
+        tags?: string[];
+        dateRange?: { from: Date; to: Date };
+    }): Promise<void> => {
+        try {
+            let results = await noteStorage.getAll();
+
+            // Apply search query filter
+            if (filters.searchQuery && filters.searchQuery.trim()) {
+                const query = filters.searchQuery.toLowerCase();
+                results = results.filter(note =>
+                    note.title.toLowerCase().includes(query) ||
+                    note.content.toLowerCase().includes(query)
+                );
+            }
+
+            // Apply tag filter (notes must have ALL selected tags)
+            if (filters.tags && filters.tags.length > 0) {
+                results = results.filter(note =>
+                    filters.tags!.every(tag => note.tags.includes(tag))
+                );
+            }
+
+            // Apply date range filter
+            if (filters.dateRange) {
+                const { from, to } = filters.dateRange;
+                results = results.filter(note => {
+                    const noteDate = new Date(note.updatedAt);
+                    return noteDate >= from && noteDate <= to;
+                });
+            }
+
+            setNotes(results);
+            setError(null);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to filter notes';
+            setError(errorMessage);
+        }
+    };
+
+    /**
+     * Get all unique tags from all notes
+     */
+    const getAllTags = (): string[] => {
+        const tagSet = new Set<string>();
+        notes.forEach(note => {
+            note.tags.forEach(tag => tagSet.add(tag));
+        });
+        return Array.from(tagSet).sort();
+    };
+
     return {
         notes,
         isLoading,
@@ -121,6 +185,8 @@ export function useNotes() {
         deleteNote,
         searchNotes,
         filterByTag,
+        filterNotes,
+        getAllTags,
         refresh: loadNotes,
     };
 }

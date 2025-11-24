@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
-import { Upload, X, Image as ImageIcon, FileText, AlertCircle } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, FileText } from 'lucide-react';
 import { AttachmentService, Attachment } from '@/services/attachmentService';
 
 interface AttachmentUploaderProps {
@@ -119,8 +119,8 @@ export function AttachmentUploader({ noteId, onUploadComplete, onError }: Attach
                 {!selectedFile ? (
                     <div
                         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
-                                ? 'border-primary bg-primary/5'
-                                : 'border-muted-foreground/25 hover:border-primary/50'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-muted-foreground/25 hover:border-primary/50'
                             }`}
                         onDragEnter={handleDrag}
                         onDragLeave={handleDrag}

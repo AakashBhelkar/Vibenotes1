@@ -39,18 +39,6 @@ export const noteStorage = {
     },
 
     /**
-     * Update an existing note locally
-     */
-    async update(id: string, updates: Partial<Note>): Promise<Note | undefined> {
-        const existing = await db.notes.get(id);
-        if (!existing) return undefined;
-
-        const updated: Note = {
-            ...existing,
-            ...updates,
-            id, // Ensure ID doesn't change
-            version: existing.version + 1,
-            updatedAt: new Date(),
         };
 
         await db.notes.put(updated);

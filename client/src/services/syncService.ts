@@ -43,8 +43,10 @@ export const syncService = {
                 if (item.id) {
                     await noteStorage.removeSyncQueueItem(item.id);
                 }
-            } catch (error: any) {
-                const status = error.response?.status;
+            } catch (error: unknown) {
+                const status = error && typeof error === 'object' && 'response' in error
+                    ? (error.response as { status?: number })?.status
+                    : undefined;
 
                 // If note not found (404), it was likely deleted on server
                 // We should remove this action from queue to stop retrying
@@ -55,7 +57,8 @@ export const syncService = {
                     continue;
                 }
 
-                errors.push(`Failed to sync ${item.action} for note ${item.noteId}: ${error.message}`);
+                const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                errors.push(`Failed to sync ${item.action} for note ${item.noteId}: ${errorMessage}`);
 
                 // Increment retry count
                 if (item.id && item.retryCount < 3) {
@@ -79,10 +82,13 @@ export const syncService = {
             const response = await apiClient.get<Note[]>('/notes');
             await noteStorage.syncFromServer(response.data);
             return { success: true };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const errorMessage = error && typeof error === 'object' && 'response' in error
+                ? ((error.response as { data?: { error?: { message?: string } } })?.data?.error?.message || 'Failed to sync from server')
+                : 'Failed to sync from server';
             return {
                 success: false,
-                error: error.response?.data?.error?.message || 'Failed to sync from server'
+                error: errorMessage
             };
         }
     },

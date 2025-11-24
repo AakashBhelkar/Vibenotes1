@@ -30,19 +30,35 @@ export interface SyncQueueItem {
 }
 
 /**
+ * Note version for history tracking
+ */
+export interface NoteVersion {
+    id?: number;
+    noteId: string;
+    version: number;
+    title: string;
+    content: string;
+    tags: string[];
+    createdAt: Date;
+    userId: string;
+}
+
+/**
  * Dexie database for offline storage
  * Follows architecture.md specifications
  */
 export class VibeNotesDB extends Dexie {
     notes!: Table<Note, string>;
     syncQueue!: Table<SyncQueueItem, number>;
+    noteVersions!: Table<NoteVersion, number>;
 
     constructor() {
         super('VibeNotesDB');
 
-        this.version(1).stores({
+        this.version(2).stores({
             notes: 'id, userId, isPinned, isArchived, updatedAt, *tags',
             syncQueue: '++id, noteId, timestamp',
+            noteVersions: '++id, noteId, version, createdAt, userId'
         });
     }
 }

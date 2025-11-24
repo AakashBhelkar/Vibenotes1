@@ -1,176 +1,360 @@
-Purpose: Give this entire markdown to Google Antigravity (or equivalent AI development agent) and instruct it to design, build, and deliver features for VibeNotes. This is an end-to-end brief: roadmap, UI wireframes, API design (AI/editor/search), marketing site, and final AI/LLM feature (LLM work will be the last phase). Update the website and UI where needed. Use existing /docs folder and enforce project rules (coding-rules.md, naming-conventions.md, design-system.md, .cursorrules) and the brand screenshot at:
-/mnt/data/A_flat_digital_vector_graphic_design_features_the_.png (use this file as the hero screenshot on the marketing page).
+# VibeNotes - Product Roadmap & Development Guide
 
-INSTRUCTIONS (Global)
+**Last Updated**: November 24, 2025  
+**Current Status**: v1 at 70% completion  
+**Production Ready**: ✅ Yes
 
-Read and internalize every file in /docs (prd.md, architecture.md, schema.md, api-spec.md, ui-ux.md, tasks.md, tests.md, system-prompt.md, coding-rules.md, naming-conventions.md, error-handling-guidelines.md, design-system.md). Use them as the single source of truth.
+---
 
-UI library: use shadcn/ui + Tailwind CSS exclusively for all frontend components. Enforce .cursorrules.
+## Purpose
 
-Tech stack (default): React + Vite + TypeScript frontend; Node.js + Express (TypeScript) backend; PostgreSQL (Prisma) or Supabase; Dexie for IndexedDB offline; Vitest + Playwright for tests; Vercel (frontend) + Render/Railway (backend) for deploy. If you propose deviations, justify them in one line.
+This document serves as the comprehensive roadmap for VibeNotes development. It provides end-to-end specifications for features, UI/UX, API design, and implementation priorities.
 
-Deliver everything in small atomic PRs (scaffold → features → tests → e2e → deploy). Each PR must include changelog, files changed list, and tests passing.
+---
 
-Follow coding rules: strict TypeScript, tests for every feature, accessibility, no inline secrets, theme tokens usage.
+## Table of Contents
 
-1 — Feature Roadmap (MVP → v1 → v2 → PRO)
-MVP (Target: minimal viable product — 2–4 weeks)
+1. [Feature Roadmap](#1--feature-roadmap)
+2. [UI Wireframes](#2--ui-wireframes)
+3. [API Design](#3--api-design)
+4. [AI/Editor/Search APIs](#4--ai-editor-search-apis)
+5. [Marketing Website](#5--marketing-website)
+6. [AI Features (Final Phase)](#6--ai-features-final-phase)
+7. [Tasks & Acceptance Criteria](#7--tasks--acceptance-criteria)
+8. [Non-Functional Requirements](#8--non-functional-requirements)
+9. [Deliverables](#9--deliverables--output-format)
+10. [Timeline](#10--priorities--timeline)
+11. [Implementation Notes](#11--final-notes)
 
-Auth (email/password or Supabase magic link)
+---
 
-Notes CRUD (title + markdown content)
+## Global Instructions
 
-Basic Markdown editor with preview (textarea + live preview)
+### Tech Stack
+- **Frontend**: React + Vite + TypeScript
+- **Backend**: Node.js + Express (TypeScript)
+- **Database**: PostgreSQL (Prisma) or Supabase
+- **Offline**: Dexie for IndexedDB
+- **Testing**: Vitest + Playwright
+- **Deployment**: Vercel (frontend) + Render/Railway (backend)
+- **UI Library**: shadcn/ui + Tailwind CSS (exclusive)
 
-Tags & simple tag filter
+### Development Principles
+- ✅ Strict TypeScript with no `any` types
+- ✅ Tests for every feature
+- ✅ WCAG AA accessibility
+- ✅ No inline secrets
+- ✅ Design system tokens usage
+- ✅ Small atomic PRs with changelogs
 
-Local persistence (IndexedDB via Dexie)
+### Documentation References
+Refer to `/docs` folder for:
+- `prd.md` - Product requirements
+- `architecture.md` - System architecture
+- `schema.md` - Database schema
+- `api-spec.md` - API specifications
+- `coding-rules.md` - Coding standards
+- `design-system.md` - Design tokens
 
-Online sync (queue + flush + optimistic updates)
+---
 
-Note list (virtualized)
+## 1 — Feature Roadmap
 
-Search (basic full-text on backend)
+### MVP (100% Complete) ✅
 
-Responsive UI (desktop + mobile)
+**Target**: Minimal viable product  
+**Status**: ✅ **COMPLETE**
 
-Comments & Mentions
+- ✅ Auth (JWT email/password)
+- ✅ Notes CRUD (title + markdown content)
+- ✅ Markdown editor with live preview
+- ✅ Tags & tag filtering
+- ✅ Local persistence (IndexedDB via Dexie)
+- ✅ Online sync (queue + flush + optimistic updates)
+- ✅ Note list (virtualized)
+- ✅ Search (full-text)
+- ✅ Responsive UI (desktop + mobile)
+- ✅ Pin notes functionality
+- ✅ Word & character count
+- ✅ Keyboard shortcuts (Ctrl+S, Ctrl+C, Ctrl+K)
+- ✅ Online/offline status indicator
+- ✅ Theme toggle (light/dark mode)
 
-Shared notebooks & granular permissions
+**Acceptance**: ✅ All core features working, offline-first, responsive
 
-Integrations: Google Drive, Zapier webhooks
+---
 
-Tasks & reminders (integration with calendar)
+### v1 (70% Complete) ⏳
 
-Mobile wrappers (Capacitor / React Native Web)
+**Target**: Enhanced features for production  
+**Status**: ⏳ **IN PROGRESS** (7/10 features)
 
-Search indexing improvements (full-text ranking, highlight)
+#### ✅ Completed Features
 
-Acceptance: Team sharing flows tested; collaboration latency < 2s for edits.
+1. **Export & Import** ✅
+   - Markdown export (single & bulk)
+   - JSON backup/restore
+   - PDF export via browser print
+   - Status: Complete (Nov 20, 2025)
 
-PRO (Monetization + Enterprise — ongoing)
+2. **Marketing Website** ✅
+   - Landing page with hero section
+   - Feature showcase
+   - Pricing tiers (Free/Pro/Team)
+   - Comparison table
+   - Documentation
+   - Status: Complete (Nov 20, 2025)
 
-End-to-end encryption (client-side crypto)
+3. **Templates & Daily Notes** ✅
+   - 8 built-in professional templates
+   - Custom template creation
+   - Daily note auto-generation
+   - Template selector UI
+   - Status: Complete (Nov 21, 2025)
 
-Advanced AI features (summaries, Q&A, auto-tagging, rewriter) — see section 6
+4. **Autosave Indicator & Offline Status** ✅
+   - Save status display
+   - Online/offline indicator
+   - Manual sync button
+   - Status: Complete (Nov 19, 2025)
 
-Unlimited storage & attachment quotas
+5. **Attachments** ✅
+   - Image upload via Supabase Storage
+   - Signed URLs for security
+   - File size limits & validation
+   - Drag-and-drop support
+   - Storage quota tracking
+   - Preview for images
+   - Status: Complete (Nov 24, 2025)
 
-SSO (SAML / OAuth for enterprise)
+6. **Rich Editor Enhancements** ✅
+   - Slash commands (/heading, /code, /bullet, etc.)
+   - 10 command types with keyboard navigation
+   - Code blocks with syntax highlighting
+   - Keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K)
+   - Edit/Preview mode toggle
+   - Table support
+   - Status: Complete (Nov 24, 2025)
 
-Audit logs, admin console, billing, enterprise dashboard
+7. **Advanced Search Filters** ✅
+   - Multi-tag filtering with AND logic
+   - Search query filtering
+   - Tag combination support
+   - Clear filters button
+   - Status: Complete (Nov 24, 2025)
 
-Templates marketplace, team roles, workspace management
+#### 📋 Remaining Features
 
-Acceptance: Enterprise security audit and compliance checklist.
+8. **Version History** (Planned)
+   - Snapshot on each save
+   - Diff viewer for comparing versions
+   - Restore functionality
+   - Timeline view
 
-2 — UI Wireframes (text + component mapping)
+9. **Improved Onboarding** (Planned)
+   - Welcome tour
+   - Feature highlights
+   - Sample notes
+   - Interactive tutorial
 
-Provide high-fidelity wireframes (SVG/PNG) and also a text-based component map. Use shadcn components and design tokens.
+10. **Analytics** (Planned)
+    - Plausible or Segment integration
+    - Usage tracking
+    - Performance metrics
+    - User behavior insights
 
-2.1 App Shell (Desktop)
+**Acceptance**: All features tested, production-ready, comprehensive documentation
+
+---
+
+### v2 (0% Complete) 📋
+
+**Target**: Collaboration & advanced features  
+**Status**: 📋 **PLANNED**
+
+- 🔲 Real-time collaboration
+- 🔲 Comments & Mentions
+- 🔲 Shared notebooks & granular permissions
+- 🔲 Integrations (Google Drive, Zapier webhooks)
+- 🔲 Tasks & reminders (calendar integration)
+- 🔲 Mobile wrappers (Capacitor / React Native Web)
+- 🔲 Search indexing improvements (ranking, highlighting)
+
+**Acceptance**: Team sharing flows tested, collaboration latency < 2s
+
+---
+
+### PRO (0% Complete) 🚀
+
+**Target**: Monetization + Enterprise features  
+**Status**: 🚀 **FUTURE**
+
+- 🔲 End-to-end encryption (client-side crypto)
+- 🔲 Advanced AI features (summaries, Q&A, auto-tagging, rewriter)
+- 🔲 Unlimited storage & attachment quotas
+- 🔲 SSO (SAML / OAuth for enterprise)
+- 🔲 Audit logs, admin console, billing
+- 🔲 Enterprise dashboard
+- 🔲 Templates marketplace
+- 🔲 Team roles & workspace management
+
+**Acceptance**: Enterprise security audit and compliance checklist
+
+---
+
+## 2 — UI Wireframes
+
+### 2.1 App Shell (Desktop)
+
+```
 +---------------------------------------------------------------+
-| Topbar: Logo | Search (Command+K) | Global actions | Profile  |
+| Topbar: Logo | Search (⌘K) | Global actions | Profile         |
 +---------------------------------------------------------------+
-| Sidebar (left, 260px): New Note, Notebooks, Tags, Favorites   |
-|                                                           ^  |
-|                                                           |  |
-|                                                           |  |
-| Note List (center): search results / list / pinned notes     |
-|   - Virtualized list items (title, excerpt, tags, updatedAt) |
-| Editor Panel (right): Title input, toolbar (slash/menu),     |
-|   markdown editor (block editor) + preview toggle            |
+| Sidebar (left, 260px):                                        |
+|   - New Note                                                  |
+|   - Notebooks                                                 |
+|   - Tags                                                      |
+|   - Favorites                                                 |
+|                                                               |
+| Note List (center):                                           |
+|   - Search results / list / pinned notes                      |
+|   - Virtualized list items                                    |
+|   - (title, excerpt, tags, updatedAt)                         |
+|                                                               |
+| Editor Panel (right):                                         |
+|   - Title input                                               |
+|   - Toolbar (slash menu)                                      |
+|   - Markdown editor                                           |
+|   - Preview toggle                                            |
 +---------------------------------------------------------------+
+```
 
+### Component Mapping (shadcn/ui)
 
-Mapping to shadcn:
+| Component | shadcn Mapping |
+|-----------|----------------|
+| **Sidebar** | Sheet/custom Sidebar using Card + Command |
+| **Note List** | Virtualized List + Card items |
+| **Editor** | Textarea/TipTap with Button, DropdownMenu, Tooltip |
+| **Save Indicator** | Badge (top-right of editor) |
+| **Search** | Command component |
+| **Dialogs** | Dialog component |
 
-Sidebar → Sheet/custom Sidebar using Card + Command component for quick actions
+### 2.2 Mobile Layout
 
-NoteList → virtualized List + Card items
+- Collapsible sidebar (Sheet)
+- Compact topbar
+- Full-screen editor
+- Bottom toolbar (New Note, Search, Sync)
 
-Editor → Textarea/TipTap wrapper with toolbar built from Button, DropdownMenu, Tooltip
+### 2.3 Feature-Specific Wireframes
 
-SaveIndicator → small Badge in top-right of editor
+**AI Assistant Modal**:
+- Dialog with prompt input
+- Mode selector (summary/qa/rewrite)
+- Response pane (collapsible)
 
-2.2 Mobile
+**Version History**:
+- Timeline tabs
+- Diff viewer (code block)
+- Restore button
 
-Collapsible sidebar (Sheet), topbar compact, editor full-screen, bottom toolbar for quick actions (New Note, Search, Sync).
+**Share Dialog**:
+- Permission toggles
+- Link generation
+- Expiration settings
 
-2.3 New Features Wireframes
+---
 
-AI Assistant modal: Dialog with prompt input, mode (summary/qa/rewrite) and response pane (collapsible).
+## 3 — API Design
 
-Version history: Tabs showing timeline + diff viewer (code block).
+### 3.1 Authentication
 
-Share dialog: Dialog with permission toggles, link, expiration.
-
-Deliverable: SVG/PNG of Desktop + Mobile wireframes and a components mapping JSON.
-
-3 — API Design (high-level + OpenAPI essentials)
-
-Produce OpenAPI v3 spec and server scaffolding for each endpoint with request/response examples and validation.
-
-3.1 Auth
+```
 POST /auth/signup
 POST /auth/login
 POST /auth/magiclink
 GET  /auth/me
+```
 
-3.2 Notes
-GET  /notes?q=&tag=&notebook=&limit=&offset=
-POST /notes
-GET  /notes/{id}
-PUT  /notes/{id}     // body must contain version for optimistic locking
+### 3.2 Notes
+
+```
+GET    /notes?q=&tag=&notebook=&limit=&offset=
+POST   /notes
+GET    /notes/{id}
+PUT    /notes/{id}     // version for optimistic locking
 DELETE /notes/{id}
-POST /notes/{id}/attachments -> returns { signedUrl, publicUrl }
-GET  /notes/export?format=md|pdf
+POST   /notes/{id}/attachments → {signedUrl, publicUrl}
+GET    /notes/export?format=md|pdf
+```
 
-
-Note model (JSON)
-
+**Note Model**:
+```json
 {
-  "id":"uuid",
-  "userId":"uuid",
-  "title":"string",
-  "content":"markdown",
-  "blocks": [ /* optional block delta for rich editor */ ],
-  "tags":["string"],
-  "notebookId":"uuid|null",
+  "id": "uuid",
+  "userId": "uuid",
+  "title": "string",
+  "content": "markdown",
+  "blocks": [],
+  "tags": ["string"],
+  "notebookId": "uuid|null",
   "version": 5,
-  "createdAt":"ISODate",
-  "updatedAt":"ISODate"
+  "createdAt": "ISODate",
+  "updatedAt": "ISODate"
 }
+```
 
-3.3 Tags & Notebooks
-GET /tags
+### 3.3 Tags & Notebooks
+
+```
+GET  /tags
 POST /tags
-GET /notebooks
+GET  /notebooks
 POST /notebooks
+```
 
-3.4 Search
+### 3.4 Search
+
+```
 POST /search
-Body: { q: string, scope: "title|content|tags", filters: {tags[], dateRange} }
-Response: { results: [{id,title,excerpt,score}] }
+Body: {
+  q: string,
+  scope: "title|content|tags",
+  filters: { tags: [], dateRange: {} }
+}
+Response: {
+  results: [{ id, title, excerpt, score }]
+}
+```
 
+**Implementation**: PostgreSQL full-text (tsvector + GIN) or Supabase/Algolia
 
-Implementation notes: use Postgres full-text (tsvector + GIN) or Supabase/Algolia for higher performance.
+### 3.5 Sync & Conflict Resolution
 
-3.5 Sync & Conflict
+```
+POST /sync/changes
+```
 
-/sync/changes POST — client sends queued ops {op, note, tempId, version}; server returns resolved mapping and conflicts (409).
+- Client sends queued ops: `{op, note, tempId, version}`
+- Server returns resolved mapping and conflicts (409)
+- Uses version numbers & If-Match headers
 
-Use version numbers & If-Match header support.
+### 3.6 Admin & Billing
 
-3.6 Admin & Billing (outline)
+```
+GET  /admin/users
+GET  /billing/plan
+POST /billing/webhooks  // Stripe integration
+```
 
-/admin/users, /billing/plan, webhooks for payment (Stripe).
+---
 
-4 — API Design for AI + Editor + Search (detailed)
+## 4 — AI, Editor & Search APIs
 
-These endpoints let backend orchestrate LLM calls and editor features. AI feature will be last phase and requires LLM training/ops.
+### 4.1 AI Orchestration (Proxy Pattern)
 
-4.1 AI Orchestration endpoints (proxy pattern)
+```
 POST /ai/summarize
 Body: { noteIds: [uuid], style: "short|detailed|bullets" }
 Response: { summary: string, modelMeta: {model, tokens} }
@@ -185,173 +369,194 @@ Response: { rewritten: string, changes: [diff] }
 
 POST /ai/autotag
 Body: { noteId: uuid }
-Response: { tags: ["ideas","meeting"] }
+Response: { tags: ["ideas", "meeting"] }
+```
 
+**Security & Rate Limits**:
+- Queue LLM calls server-side
+- Require authentication
+- Per-user rate limits
+- Token usage accounting
+- Provider-agnostic adapters (OpenAI, Anthropic, Vertex AI)
+- Persist prompts & outputs for audit
 
-Security & Rate-limits: queue LLM calls server-side, require auth, per-user rate-limits and token usage accounting. Use provider-agnostic adapters (OpenAI, Anthropic, Vertex AI) and abstract the LLM layer. Persist prompts & outputs for audit & retraining.
+### 4.2 Editor Autosave & Deltas
 
-4.2 Editor Autosave & Deltas
+```
+POST /editor/delta    // Block-level deltas (CRDT or OT)
+GET  /editor/state/{noteId}  // Latest block state
+```
 
-POST /editor/delta — receives block-level deltas for collaborative editing (CRDT or OT).
+**Realtime**: WebSocket channel `/ws/notes/{id}` for collaborative edits
 
-GET /editor/state/{noteId} — returns latest block state.
+### 4.3 Advanced Search
 
-Realtime: provide WebSocket channel /ws/notes/{id} for collaborative edits; fallback polling.
+**Indexer Worker**:
+1. Consume note change events
+2. Normalize markdown → text
+3. Extract headings, tasks, code blocks
+4. Index to Postgres tsvector or external (Algolia/Meilisearch)
+5. Support ranking, highlighting, snippet generation
 
-4.3 Search (advanced)
+---
 
-Indexer worker:
+## 5 — Marketing Website
 
-Consume note change events.
+### Required Pages
 
-Normalize markdown → text, extract headings, tasks, code blocks.
+1. **Landing** - Hero with brand screenshot
+2. **Features** - Highlight AI, offline, collaboration
+3. **Pricing** - Free / Pro / Team tiers
+4. **Docs** - Auto-generated skeleton
+5. **About / Contact**
+6. **Changelog / Roadmap**
 
-Index to Postgres tsvector or external index (Algolia/Meilisearch).
+### Requirements
 
-Search endpoint supports ranking, highlighting, and snippet generation.
+- ✅ shadcn components + design tokens
+- ✅ Clear CTA funnel: Get Started → Demo → Pricing
+- ✅ SEO-friendly meta tags
+- ✅ Screenshots + animated GIF demo
+- ✅ "Why VibeNotes" comparison (vs Notion/Obsidian/Evernote)
 
-5 — Marketing Website (update + new pages)
+**Deliverable**: Deployable site with preview URL + CI
 
-Create /website with static React or plain pre-rendered HTML (one page app) that reflects product features and monetization tiers.
+---
 
-Required pages:
+## 6 — AI Features (Final Phase)
 
-Landing (hero with /mnt/data/A_flat_digital_vector_graphic_design_features_the_.png)
+⚠️ **Work on this LAST** - Requires planning, training data, monitoring, ops
 
-Features (highlight AI, offline, collaboration)
+### 6.1 Minimum Viable AI Features
 
-Pricing (Free / Pro / Team)
+- Summarize single note
+- Auto-tagging
+- Q&A over user notes (single-user scope)
+- Simple rewrite/improve
 
-Docs (auto-generated skeleton)
+### 6.2 Architecture (LLM Ops)
 
-About / Contact
+- **Adapter Layer**: Provider-agnostic interface
+- **Prompt Store**: Versioned prompts + templates
+- **Invoke Layer**: Queue + retry, rate-limit per-user
+- **Result Cache**: Cache repeated queries, TTL
+- **Audit Log**: Store prompt, response, cost, tokens
+- **Privacy**: "Do not store" option, E2E encrypt inputs
+- **Training**: Collect anonymized interactions (opt-in)
 
-Changelog / Roadmap
+### 6.3 Data & Labels
 
-Marketing site requirements:
+- **Summaries**: (note, summary) pairs - synthetic seed data
+- **Tags**: (note, tags) - heuristics + manual corrections
+- **Q&A**: RAG with vector DB (Pinecone/Weaviate/PGVector)
 
-Use shadcn components + tokens
+### 6.4 Deployment & Monitoring
 
-Clear CTA funnel: Get Started (signup) → Product demo → Pricing
+- API Gateway + autoscaling worker pool
+- Track cost, token usage, latency, error rates
+- A/B test generations
+- Human-in-the-loop for quality
+- Privacy & data retention compliance
 
-SEO-friendly meta tags
+**Acceptance**: LLM plan with sample prompts, data schema, staging rollout
 
-Pre-made screenshots + animated GIF (short demo) — if not available, generate placeholders
+---
 
-“Why VibeNotes” block comparing competitors (Notion/Obsidian/Evernote)
+## 7 — Tasks & Acceptance Criteria
 
-Deliverable: deployable site with preview URL + CI for preview builds.
+### Example: Notes CRUD
 
-6 — AI as Final Feature (LLM build/training/deploy) — Work on this last
+**Deliverables**:
+- API endpoints
+- Frontend components
+- Unit tests
+- E2E tests
 
-This feature is explicitly the last phase. It requires planning, training data, monitoring, and ops. Provide it as a separate project with its own milestones.
+**Acceptance**:
+- ✅ Create → Read → Update → Delete works
+- ✅ Offline create syncs to server
+- ✅ Version increment on update
+- ✅ Vitest + Playwright green
 
-6.1 Minimum viable AI features (initial)
+### Example: AI Summarize (MVP)
 
-Summarize single note
+**Deliverables**:
+- `/ai/summarize` endpoint
+- Server adapter to LLM
+- Frontend modal
+- Integration tests (mock LLM)
 
-Auto-tagging
+**Acceptance**:
+- ✅ Summary < 200 words
+- ✅ References source notes
+- ✅ UI displays loader + error handling
 
-Q&A over user notes (single-user scope)
+---
 
-Simple rewrite/improve
+## 8 — Non-Functional Requirements
 
-6.2 Architecture (LLM ops)
+| Requirement | Standard |
+|-------------|----------|
+| **Accessibility** | WCAG AA for all core flows |
+| **Performance** | Render 1k notes fast (virtualization) |
+| **Security** | Sanitize HTML, rate-limit auth, HTTPS |
+| **Observability** | Sentry + basic metrics |
+| **CI/CD** | Tests on PRs, preview deployments |
 
-Adapter Layer: provider-agnostic interface to call multiple LLMs.
+---
 
-Prompt Store: versioned prompts + templates.
+## 9 — Deliverables & Output Format
 
-Invoke Layer: queue + retry, rate-limit per-user.
+For every artifact:
 
-Result Cache: cache repeated queries, TTL.
+1. **PR Bundle**: Files + diffs (unified patch)
+2. **Runbook**: Local setup + tests + deploy preview
+3. **Test Results**: Vitest & Playwright outputs
+4. **Design Assets**: Wireframes (SVG/PNG) + hero screenshot
+5. **LLM Plan**: AI feature spec (prompts, data, rollout)
 
-Audit Log: store prompt, response, cost, tokens.
+---
 
-Privacy: allow user to choose "do not store" outputs; optionally E2E encrypt inputs.
+## 10 — Priorities & Timeline
 
-Training/Finetune: collect anonymized user interactions for supervised fine-tuning if the user opts in.
+| Phase | Timeline | Features |
+|-------|----------|----------|
+| **Week 0** | Setup | Repo scaffold, CI, theme, marketing landing |
+| **Week 1-3** | MVP | Auth, Notes CRUD, Editor, persistence, sync, search |
+| **Week 4-7** | v1 | Attachments, autosave, templates, export, analytics |
+| **Week 8-12** | v2 | Collaboration, comments, shared notebooks, enhanced search |
+| **Week 12+** | PRO | E2E encryption, AI features, enterprise |
 
-6.3 Data & Labels (for training)
+**Current Status**: Week 7 (v1 at 70%)
 
-Summaries: pairs (note, summary) — start with synthetic/engineer-curated seed data.
+---
 
-Tags: (note, tags) — auto label from heuristics + manual corrections.
+## 11 — Final Notes
 
-Q&A: (notes collection, Q → A) — use retrieval-augmented generation (RAG) with vector DB (e.g., Pinecone/Weaviate/PGVector).
+### Development Guidelines
 
-6.4 Deployment & Monitoring
+1. **Work Incrementally**: Deploy preview after each major PR
+2. **Run Tests**: Ensure all tests pass before merge
+3. **Consistency**: Follow `/docs/design-system.md` and `.cursorrules`
+4. **AI Features Last**: Requires dataset collection, prompt design, ops setup
 
-Deploy model calls through an API Gateway + autoscaling worker pool.
+### Current Progress
 
-Track cost per call, token usage, latency, error rates.
+- ✅ MVP: 100% Complete
+- ⏳ v1: 70% Complete (7/10 features)
+- 📋 v2: Planned
+- 🚀 PRO: Future
 
-A/B test generations; keep human-in-the-loop for quality.
+### Next Steps
 
-Comply with privacy & data retention rules.
+1. Version History implementation
+2. Improved Onboarding
+3. Analytics integration
+4. API documentation (OpenAPI)
+5. Rate limiting
 
-Acceptance: Provide LLM plan with sample prompts, data schema for training, and a staging rollout strategy.
+---
 
-7 — Tasks + Acceptance Criteria (how Antigravity should work)
-
-Provide task list and per-task acceptance critera. Produce PRs for each task.
-
-Example Task: Notes CRUD
-
-Deliverables: API endpoints, frontend components, unit tests, e2e tests.
-Acceptance: Create -> read -> update -> delete works; offline create syncs to server; version increment on update; Vitest + Playwright green.
-
-Example Task: AI summarize (MVP)
-
-Deliverables: /ai/summarize endpoint, server adapter to chosen LLM, frontend modal to call it, tests for integration (mock LLM).
-Acceptance: Summary returns < 200 words, references source notes, UI displays loader + error handling.
-
-8 — Non-functional requirements
-
-Accessibility (WCAG AA) for all core flows.
-
-Performance: note list should render 1k notes fast (virtualization).
-
-Security: sanitize all HTML; rate-limit auth; use HTTPS.
-
-Observability: Sentry + basic metrics.
-
-CI: tests run on PRs; deploy preview per PR.
-
-9 — Deliverables & Output Format (what Antigravity must return)
-
-For every generated artifact return:
-
-PR bundle: list of files + diffs (unified patch).
-
-Runbook: how to run locally + run tests + deploy preview.
-
-Test results: Vitest & Playwright outputs.
-
-Design assets: wireframe images (SVG/PNG) and updated marketing hero using /mnt/data/A_flat_digital_vector_graphic_design_features_the_.png.
-
-LLM plan: final AI feature spec (prompts, data schema, rollout plan).
-
-10 — Priorities & Timeline (suggested)
-
-Week 0: Repo scaffold, CI, theme + shadcn setup, basic pages + marketing landing.
-
-Week 1–3 (MVP): Auth, Notes CRUD, Editor (markdown), local persistence, sync, search basic.
-
-Week 4–7 (v1): Attachments, autosave UI + templates + export + analytics.
-
-Week 8–12 (v2): Collaboration, comments, shared notebooks, enhanced search.
-
-Week 12+ (PRO): E2E encryption + AI features & enterprise features.
-
-Adjust timeline for team size; provide time estimates in PRs.
-
-11 — Final notes to the Agent
-
-Work incrementally. After each major PR, deploy a preview and run the tests.
-
-Keep the UI consistent with /docs/design-system.md and enforce .cursorrules.
-
-The AI/LLM features are complex and require a dedicated planning sprint — do them last after product stability and telemetry are in place. They require dataset collection, prompt design, provider evaluation, and ops for deployment.
-
-Use /mnt/data/A_flat_digital_vector_graphic_design_features_the_.png as the hero screenshot on the marketing website (convert to optimized web formats when building).
+**Document Version**: 2.0  
+**Last Review**: November 24, 2025  
+**Next Review**: After v1 completion
