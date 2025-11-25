@@ -25,6 +25,7 @@
     "dexie": "^4.2.1",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.344.0",
+    "plausible-tracker": "^0.3.9",
     "react": "^18.2.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.2.0",

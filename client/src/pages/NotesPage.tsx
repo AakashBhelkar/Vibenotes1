@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NoteList } from '@/components/NoteList';
 import { NoteEditor } from '@/components/NoteEditor';
 import { ExportMenu } from '@/components/ExportMenu';
@@ -6,14 +6,19 @@ import { NoteAttachments } from '@/components/NoteAttachments';
 import { StorageQuotaDisplay } from '@/components/StorageQuotaDisplay';
 import { useNotes } from '@/hooks/useNotes';
 import { useSyncStatus } from '@/hooks/useSync';
-import { Note } from '@/lib/db';
+import { Note, NoteVersion } from '@/lib/db';
 import { Button } from '@/components/ui/button';
-import { Cloud, CloudOff, RefreshCw, LogOut } from 'lucide-react';
+import { Cloud, CloudOff, RefreshCw, LogOut, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { ModeToggle } from '@/components/ModeToggle';
 import { TemplateSelector } from '@/components/TemplateSelector';
 import { TemplateService, Template } from '@/services/templateService';
+import { WelcomeModal } from '@/components/WelcomeModal';
+import { onboardingService } from '@/services/onboardingService';
+import { sampleNotes } from '@/data/sampleNotes';
+import { analyticsService } from '@/services/analyticsService';
+import { VersionHistory } from '@/components/VersionHistory';
 
 /**
  * Main Notes page with list and editor
@@ -23,15 +28,25 @@ export default function NotesPage() {
     const navigate = useNavigate();
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [showWelcome, setShowWelcome] = useState(false);
+    const [showVersionHistory, setShowVersionHistory] = useState(false);
 
     const { notes, createNote, updateNote, deleteNote, searchNotes, refresh } = useNotes();
     const { isOnline, isSyncing, sync } = useSyncStatus();
+
+    // Check if this is the user's first visit
+    useEffect(() => {
+        if (onboardingService.isFirstVisit()) {
+            setShowWelcome(true);
+        }
+    }, []);
 
     const handleCreateNote = async (): Promise<void> => {
         try {
             const newNote = await createNote('Untitled', '');
             setSelectedNote(newNote);
             setErrorMessage(null);
+            analyticsService.trackNoteCreated();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to create note';
             setErrorMessage(message);
@@ -110,6 +125,7 @@ export default function NotesPage() {
             );
             setSelectedNote(newNote);
             setErrorMessage(null);
+            analyticsService.trackTemplateUsed(template.name, template.id.startsWith('custom-'));
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to create note from template';
             setErrorMessage(message);
@@ -126,8 +142,47 @@ export default function NotesPage() {
             );
             setSelectedNote(newNote);
             setErrorMessage(null);
+            analyticsService.trackDailyNoteCreated();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to create daily note';
+            setErrorMessage(message);
+        }
+    };
+
+    const handleCreateSampleNotes = async (): Promise<void> => {
+        try {
+            if (!onboardingService.hasSampleNotes()) {
+                // Create sample notes
+                for (const sampleNote of sampleNotes) {
+                    await createNote(sampleNote.title, sampleNote.content, sampleNote.tags);
+                }
+                onboardingService.markSampleNotesCreated();
+                refresh();
+            }
+            onboardingService.completeOnboarding();
+            analyticsService.trackOnboardingCompleted(!onboardingService.hasSampleNotes());
+            setErrorMessage(null);
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to create sample notes';
+            setErrorMessage(message);
+        }
+    };
+
+    const handleRestoreVersion = async (version: NoteVersion): Promise<void> => {
+        try {
+            if (selectedNote) {
+                await updateNote(selectedNote.id, {
+                    title: version.title,
+                    content: version.content,
+                    tags: version.tags,
+                });
+                refresh();
+                setShowVersionHistory(false);
+                analyticsService.trackVersionRestored();
+                setErrorMessage(null);
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to restore version';
             setErrorMessage(message);
         }
     };
@@ -208,7 +263,23 @@ export default function NotesPage() {
                 </div>
 
                 {/* Note Editor */}
-                <div className="flex-1 border-r">
+                <div className="flex-1 border-r flex flex-col">
+                    {selectedNote && (
+                        <div className="border-b p-2 flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setShowVersionHistory(true);
+                                    analyticsService.trackVersionHistoryViewed();
+                                }}
+                                title="Version History (Ctrl+H)"
+                            >
+                                <Clock className="h-4 w-4 mr-2" />
+                                History
+                            </Button>
+                        </div>
+                    )}
                     <NoteEditor
                         note={selectedNote}
                         onSave={handleSaveNote}
@@ -227,6 +298,29 @@ export default function NotesPage() {
                     )}
                 </div>
             </div>
+
+            {/* Version History Modal */}
+            {showVersionHistory && selectedNote && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-background rounded-lg shadow-lg w-[90vw] h-[80vh] max-w-6xl">
+                        <VersionHistory
+                            noteId={selectedNote.id}
+                            onRestore={handleRestoreVersion}
+                            onClose={() => setShowVersionHistory(false)}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {/* Welcome Modal for First-Time Users */}
+            <WelcomeModal
+                open={showWelcome}
+                onClose={() => {
+                    setShowWelcome(false);
+                    onboardingService.completeOnboarding();
+                }}
+                onCreateSampleNotes={handleCreateSampleNotes}
+            />
         </div>
     );
 }
