@@ -70,7 +70,7 @@ export function AttachmentUploader({ noteId, onUploadComplete, onError }: Attach
         setUploadProgress(0);
 
         try {
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('vibenote-token');
             if (!token) {
                 throw new Error('Not authenticated');
             }

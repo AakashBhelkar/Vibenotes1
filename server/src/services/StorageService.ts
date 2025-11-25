@@ -1,67 +1,36 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 /**
- * Storage service for handling file uploads to Supabase Storage
+ * Storage service for handling file uploads to local filesystem
+ * (Replaces Supabase Storage for simplified local development)
  */
 export class StorageService {
-    private supabase: SupabaseClient | undefined;
-    private bucketName: string;
+    private uploadDir: string;
+    private baseUrl: string;
 
     constructor() {
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-        this.bucketName = process.env.SUPABASE_BUCKET_NAME || 'attachments';
+        // Store files in 'uploads' directory in the server root
+        this.uploadDir = path.join(__dirname, '../../uploads');
+        this.baseUrl = process.env.API_URL || 'http://localhost:3001';
 
-        if (!supabaseUrl || !supabaseKey) {
-            console.warn('⚠️ Supabase configuration is missing. Attachments feature will be disabled.');
-            // Provide a dummy client that safely no‑ops storage calls
-            this.supabase = this.createDummyClient();
-        } else {
-            this.supabase = createClient(supabaseUrl, supabaseKey);
+        // Ensure upload directory exists
+        if (!fs.existsSync(this.uploadDir)) {
+            fs.mkdirSync(this.uploadDir, { recursive: true });
         }
     }
 
-    private getClient(): any {
-        // After construction this.supabase is always defined (real or dummy)
-        return this.supabase;
-    }
-
     /**
-     * Creates a dummy Supabase client with no‑op storage methods.
-     * This allows the rest of the code to run without a real Supabase instance.
+     * Generate a unique file name
      */
-    private createDummyClient(): any {
-        return {
-            storage: {
-                from: (_bucket: string) => ({
-                    upload: async () => ({ data: {}, error: null }),
-                    getPublicUrl: () => ({ data: { publicUrl: '' } }),
-                    remove: async () => ({ error: null }),
-                    listBuckets: async () => ({ data: [] }),
-                    createBucket: async () => ({ error: null }),
-                    createSignedUrl: async () => ({ data: null, error: { message: 'Supabase not configured' } })
-                })
-            }
-        } as any;
-    }
-
-    /**
-     * Generate a unique file path for storage
-     */
-    private generateFilePath(userId: string, noteId: string, fileName: string): string {
+    private generateFileName(userId: string, noteId: string, fileName: string): string {
         const timestamp = Date.now();
         const sanitizedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
-        return `${userId}/${noteId}/${timestamp}_${sanitizedFileName}`;
+        return `${userId}_${noteId}_${timestamp}_${sanitizedFileName}`;
     }
 
     /**
-     * Upload a file to Supabase Storage
-     * @param userId - User ID for organizing files
-     * @param noteId - Note ID for organizing files
-     * @param fileName - Original file name
-     * @param fileBuffer - File content as Buffer
-     * @param mimeType - MIME type of the file
-     * @returns Object containing the file URL and path
+     * Upload a file to local storage
      */
     async uploadFile(
         userId: string,
@@ -70,85 +39,50 @@ export class StorageService {
         fileBuffer: Buffer,
         mimeType: string
     ): Promise<{ url: string; path: string }> {
-        const client = this.getClient();
-        const filePath = this.generateFilePath(userId, noteId, fileName);
+        const uniqueFileName = this.generateFileName(userId, noteId, fileName);
+        const filePath = path.join(this.uploadDir, uniqueFileName);
 
-        const { data, error } = await client.storage
-            .from(this.bucketName)
-            .upload(filePath, fileBuffer, {
-                contentType: mimeType,
-                upsert: false,
-            });
+        try {
+            await fs.promises.writeFile(filePath, fileBuffer);
 
-        if (error) {
+            // Return the full URL to the file
+            const url = `${this.baseUrl}/uploads/${uniqueFileName}`;
+
+            return {
+                url,
+                path: uniqueFileName,
+            };
+        } catch (error: any) {
             throw new Error(`Failed to upload file: ${error.message}`);
         }
-
-        // Get public URL
-        const { data: urlData } = client.storage
-            .from(this.bucketName)
-            .getPublicUrl(filePath);
-
-        return {
-            url: urlData.publicUrl,
-            path: filePath,
-        };
     }
 
     /**
-     * Delete a file from Supabase Storage
-     * @param filePath - Path to the file in storage
+     * Delete a file from local storage
      */
-    async deleteFile(filePath: string): Promise<void> {
-        const client = this.getClient();
-        const { error } = await client.storage
-            .from(this.bucketName)
-            .remove([filePath]);
+    async deleteFile(fileName: string): Promise<void> {
+        const filePath = path.join(this.uploadDir, fileName);
 
-        if (error) {
+        try {
+            if (fs.existsSync(filePath)) {
+                await fs.promises.unlink(filePath);
+            }
+        } catch (error: any) {
             throw new Error(`Failed to delete file: ${error.message}`);
         }
     }
 
     /**
-     * Get a signed URL for temporary access to a file
-     * @param filePath - Path to the file in storage
-     * @param expiresIn - Expiration time in seconds (default: 1 hour)
-     * @returns Signed URL
+     * Get a signed URL (Not needed for local storage, returns public URL)
      */
-    async getSignedUrl(filePath: string, expiresIn: number = 3600): Promise<string> {
-        const client = this.getClient();
-        const { data, error } = await client.storage
-            .from(this.bucketName)
-            .createSignedUrl(filePath, expiresIn);
-
-        if (error || !data) {
-            throw new Error(`Failed to generate signed URL: ${error?.message || 'Unknown error'}`);
-        }
-
-        return data.signedUrl;
+    async getSignedUrl(fileName: string, expiresIn: number = 3600): Promise<string> {
+        return `${this.baseUrl}/uploads/${fileName}`;
     }
 
     /**
-     * Check if the storage bucket exists, create if it doesn't
+     * Check if bucket exists (No-op for local storage)
      */
     async ensureBucketExists(): Promise<void> {
-        if (!this.supabase) return; // Skip if not configured
-
-        const client = this.supabase;
-        const { data: buckets } = await client.storage.listBuckets();
-        const bucketExists = buckets?.some((bucket: { name: string }) => bucket.name === this.bucketName);
-
-        if (!bucketExists) {
-            const { error } = await client.storage.createBucket(this.bucketName, {
-                public: true,
-                fileSizeLimit: 10485760, // 10MB
-                allowedMimeTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'],
-            });
-
-            if (error) {
-                throw new Error(`Failed to create storage bucket: ${error.message}`);
-            }
-        }
+        // No-op
     }
 }
