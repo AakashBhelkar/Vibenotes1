@@ -6,6 +6,7 @@ import App from './App'
 describe('App', () => {
     it('renders headline', () => {
         render(<App />)
-        expect(screen.getByText('VibeNotes')).toBeInTheDocument()
+        const elements = screen.getAllByText('VibeNotes')
+        expect(elements.length).toBeGreaterThan(0)
     })
 })

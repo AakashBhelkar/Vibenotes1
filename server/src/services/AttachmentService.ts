@@ -76,12 +76,11 @@ export class AttachmentService {
 
         // Extract file path from URL
         const urlParts = attachment.url.split('/');
-        const bucketIndex = urlParts.findIndex(part => part === 'attachments');
-        const filePath = urlParts.slice(bucketIndex + 1).join('/');
+        const fileName = urlParts[urlParts.length - 1];
 
         // Delete from storage
         try {
-            await this.storageService.deleteFile(filePath);
+            await this.storageService.deleteFile(fileName);
         } catch (error) {
             console.error('Failed to delete file from storage:', error);
             // Continue with database deletion even if storage deletion fails
@@ -101,9 +100,8 @@ export class AttachmentService {
         for (const attachment of attachments) {
             try {
                 const urlParts = attachment.url.split('/');
-                const bucketIndex = urlParts.findIndex(part => part === 'attachments');
-                const filePath = urlParts.slice(bucketIndex + 1).join('/');
-                await this.storageService.deleteFile(filePath);
+                const fileName = urlParts[urlParts.length - 1];
+                await this.storageService.deleteFile(fileName);
             } catch (error) {
                 console.error(`Failed to delete file ${attachment.fileName} from storage:`, error);
             }

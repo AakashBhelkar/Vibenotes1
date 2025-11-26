@@ -287,8 +287,8 @@ export default function NotesPage() {
                     />
                 </div>
 
-                {/* Right Sidebar - Attachments */}
-                <div className="w-80 flex-shrink-0 overflow-y-auto p-4 bg-muted/30">
+                {/* Right Sidebar - Attachments (Disabled for v1) */}
+                {/* <div className="w-80 flex-shrink-0 overflow-y-auto p-4 bg-muted/30">
                     <StorageQuotaDisplay />
                     {selectedNote && (
                         <NoteAttachments
@@ -296,7 +296,7 @@ export default function NotesPage() {
                             onError={setErrorMessage}
                         />
                     )}
-                </div>
+                </div> */}
             </div>
 
             {/* Version History Modal */}

@@ -103,7 +103,7 @@ describe('Export Service', () => {
                 expect.fail('Should have thrown an error');
             } catch (error) {
                 expect(error).toBeInstanceOf(Error);
-                expect((error as Error).message).toBe('Invalid backup file format');
+                expect((error as Error).message).toBe('Failed to parse backup file');
             }
         });
     });

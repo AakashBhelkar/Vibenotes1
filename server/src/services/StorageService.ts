@@ -42,6 +42,9 @@ export class StorageService {
         const uniqueFileName = this.generateFileName(userId, noteId, fileName);
         const filePath = path.join(this.uploadDir, uniqueFileName);
 
+        console.log('StorageService: Uploading file to:', filePath);
+        console.log('StorageService: Upload directory:', this.uploadDir);
+
         try {
             await fs.promises.writeFile(filePath, fileBuffer);
 
@@ -53,6 +56,7 @@ export class StorageService {
                 path: uniqueFileName,
             };
         } catch (error: any) {
+            console.error('StorageService: Write failed:', error);
             throw new Error(`Failed to upload file: ${error.message}`);
         }
     }
